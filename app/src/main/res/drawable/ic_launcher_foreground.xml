@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer accent glow ring -->
+    <path
+        android:pathData="M54,27 C68.91,27 81,39.09 81,54 C81,68.91 68.91,81 54,81 C39.09,81 27,68.91 27,54 C27,39.09 39.09,27 54,27 Z"
+        android:strokeColor="#3325E289"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000" />
+
+    <!-- Up-Right arrow: Lent / Receivable (Mint Green) -->
+    <path
+        android:pathData="M38,62 L64,36 M64,36 L48,36 M64,36 L64,52"
+        android:strokeColor="#25E289"
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+
+    <!-- Down-Left arrow: Borrowed / Repayment (Warm Sand / Light Gold) -->
+    <path
+        android:pathData="M70,46 L44,72 M44,72 L60,72 M44,72 L44,56"
+        android:strokeColor="#F5B971"
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+
+    <!-- Central SettleUp currency dot -->
+    <path
+        android:pathData="M54,50 A4,4 0 1,0 54,58 A4,4 0 1,0 54,50 Z"
+        android:fillColor="#FFFFFF" />
+</vector>

@@ -1,0 +1,1408 @@
+# SETTLEUP — MASTER PRODUCT, DESIGN & IMPLEMENTATION SPECIFICATION
+
+## 1. PROJECT OVERVIEW
+
+Build a polished, responsive personal debt management application called **SettleUp**.
+
+Tagline: **Every debt. Every payment. Clear records.**
+
+SettleUp helps people track money they owe others and money others owe them. It provides a reliable record of borrowing, lending, repayments, transaction messages, proof attachments, reminders, and outstanding balances.
+
+The application should work for individuals who want to maintain private records without requiring the other party to register. It should also support optional shared debt relationships where both parties have accounts and can receive transaction notifications, confirm entries, or dispute them.
+
+The app must be a real, functional application backed by Firebase, not a static UI prototype.
+
+### Product goals
+
+1. Make it easy to record borrowing, lending, and repayments.
+2. Always show accurate outstanding balances.
+3. Preserve a complete history of financial activity.
+4. Support multiple separate debts between the same two people over time.
+5. Allow optional transaction messages and proof attachments.
+6. Provide configurable repayment and follow-up reminders.
+7. Support optional shared records with confirmation and dispute workflows.
+8. Provide financial summaries and Excel-compatible exports.
+9. Protect financial information through authentication and proper authorization.
+10. Deliver a clean, professional experience on desktop and mobile.
+
+### Target users
+
+- Individuals borrowing money from friends and family.
+- People lending money to others.
+- People tracking informal loans and repayments.
+- Small traders recording credit given to customers.
+- Individuals who need a straightforward financial ledger without full accounting software.
+
+### Product boundaries
+
+SettleUp is a record-keeping and debt management tool. It does not lend money, process payments, automatically verify M-Pesa transactions, determine legal liability, or act as a credit bureau.
+
+A recorded transaction is not necessarily a confirmed transaction. The application must clearly distinguish between a user's entry and an entry acknowledged by the other party.
+
+---
+
+## 2. TECHNOLOGY STACK
+
+Build the initial release as a responsive web application.
+
+### Frontend
+
+- React with TypeScript.
+- Vite for development and production builds.
+- Tailwind CSS or an equivalent consistent styling system.
+- Reusable, well-structured UI components.
+- React Router for navigation.
+- Firebase JavaScript SDK using supported modular APIs.
+- A suitable charting library for simple financial summaries.
+- A maintained XLSX library for Excel export.
+- Accessible form controls, dialogs, tables, and navigation.
+
+Use stable, compatible package versions. Avoid unnecessary libraries and duplicated functionality.
+
+### Firebase backend
+
+Use Firebase as the application's backend.
+
+**Firebase Authentication**
+- Email and password registration.
+- Login and logout.
+- Password reset.
+- Email verification.
+- Authenticated sessions.
+- Google sign-in may be added if straightforward.
+
+**Cloud Firestore**
+- User profiles.
+- People and contacts.
+- Debt records.
+- Immutable transaction entries and correction records.
+- Shared debt relationships.
+- Invitations.
+- Transaction confirmations and disputes.
+- Reminders.
+- In-app notifications.
+- User preferences and export metadata where needed.
+
+**Cloud Storage for Firebase**
+- Transaction proof images.
+- Screenshots and supporting documents.
+- Private attachments protected by authentication and authorization rules.
+
+**Cloud Functions for Firebase**
+- Trusted server-side operations where necessary.
+- Secure transaction creation and validation for shared debts.
+- Notification generation.
+- Invitation processing.
+- Reminder scheduling and delivery.
+- Other operations that must not depend on trusted client input.
+
+Use a supported second-generation Cloud Functions runtime and current Firebase SDKs.
+
+**Firebase Cloud Messaging**
+- Browser push notifications where supported and permitted.
+- Notification delivery for relevant transaction and reminder events.
+
+In-app notifications must remain available even when browser push notifications are disabled.
+
+**Firebase Hosting**
+- Deploy the production web application.
+- Configure client-side routing fallback.
+- Use HTTPS.
+- Provide environment-specific configuration and deployment instructions.
+
+Use the Firebase Emulator Suite where practical for local testing.
+
+### Backend principles
+
+- Never place service account credentials or private secrets in frontend code.
+- Do not use Firebase Admin SDK in the browser.
+- Do not rely on client-side checks as the only security control.
+- Do not expose unrestricted attachment URLs.
+- Use Firestore Security Rules and Storage Security Rules.
+- Use Cloud Functions for operations that require trusted validation or privileged access.
+- Use Firestore transactions or atomic write operations where appropriate to maintain consistency.
+- Do not simulate successful backend operations when Firebase is unavailable.
+
+---
+
+## 3. DESIGN SYSTEM AND VISUAL DIRECTION
+
+The application should feel like a mature, trustworthy fintech product.
+
+Use the previously established clean dashboard concept as the design reference.
+
+### Visual style
+
+- Warm off-white or very light neutral page backgrounds.
+- Deep forest green or dark green for primary actions and selected elements.
+- White cards with subtle borders.
+- Dark charcoal text.
+- Muted gray secondary text.
+- Restrained green accents for positive financial activity.
+- Muted amber or neutral styling for pending states.
+- Clear red indicators for errors or disputed records.
+- Generous spacing and consistent alignment.
+- Rounded cards and buttons with restrained corner radii.
+- Subtle transitions that do not interfere with performance.
+- Readable typography and strong information hierarchy.
+
+Avoid:
+- Excessive gradients.
+- Neon colors.
+- Too many colors on the same screen.
+- Excessive shadows.
+- Unnecessary decorative illustrations.
+- Excessive emoji usage.
+- Oversized headings that waste mobile space.
+- Charts that add no meaningful information.
+
+Use a consistent icon library such as Lucide.
+
+### Responsive behavior
+
+Desktop:
+- A clean sidebar or compact navigation rail.
+- Main content with a sensible maximum width.
+- Financial summary cards arranged in a responsive grid.
+- Tables where they improve information density.
+- Detail panels and dialogs for focused actions.
+
+Mobile:
+- Four primary navigation destinations: Home, People, Summary, and Activity.
+- A prominent add action.
+- Single-column cards.
+- Large, touch-friendly buttons.
+- Transaction details presented as a readable full-screen page or bottom sheet.
+- Forms that fit small screens.
+- No horizontal overflow.
+- Important financial totals visible without excessive scrolling.
+
+### Accessibility
+
+- Use semantic HTML.
+- Provide accessible names for icon-only buttons.
+- Support keyboard navigation.
+- Ensure sufficient contrast.
+- Show text labels alongside meaningful status colors.
+- Associate form errors with their inputs.
+- Respect reduced-motion preferences.
+
+### Shared UI components
+
+Create reusable components for:
+- Buttons and inputs.
+- Cards.
+- Person avatars and initials.
+- Currency amounts.
+- Debt status badges.
+- Transaction list items.
+- Confirmation dialogs.
+- Date pickers.
+- File upload controls.
+- Empty states.
+- Loading skeletons.
+- Toast notifications.
+- Pagination or incremental loading where needed.
+- Error and retry states.
+
+Maintain a consistent design system across every screen.
+
+---
+
+## 4. APPLICATION NAVIGATION
+
+Provide the following main sections:
+
+1. Home
+2. People
+3. Summary
+4. Activity
+
+Additional destinations:
+- Debt details.
+- Transaction details.
+- Add or edit transaction.
+- Create a reminder.
+- Notifications.
+- Invitations.
+- Profile and settings.
+- Export reports.
+
+Users must be able to return to previous screens without losing unsaved work.
+
+---
+
+## 5. AUTHENTICATION AND ONBOARDING
+
+### Splash and introductory experience
+
+Display the SettleUp name, logo, and tagline.
+
+Introduce the app's main benefits briefly:
+- Track what you owe.
+- Track what others owe you.
+- Keep clear repayment records.
+
+Allow users to skip introductory slides.
+
+### Registration
+
+Collect:
+- Full name.
+- Email address.
+- Password.
+- Password confirmation.
+
+Validate all fields and provide helpful errors.
+
+Use Firebase Authentication. Send an email verification link where appropriate.
+
+Do not create an authenticated-looking interface without a valid authentication state.
+
+### Login
+
+Support:
+- Email and password.
+- Password reset.
+- Clear validation errors.
+- Loading states.
+- Logout.
+
+After successful login, load the user's profile and navigate to the dashboard.
+
+### Profile initialization
+
+Create the user's profile document safely after registration. Avoid duplicate profile creation if the initialization process is retried.
+
+Profile fields should include:
+- User ID.
+- Display name.
+- Email.
+- Preferred currency.
+- Time zone.
+- Notification preferences.
+- Created timestamp.
+- Updated timestamp.
+
+Use Kenya's time zone, Africa/Nairobi, as the initial default when appropriate, but allow users to change it.
+
+The initial preferred currency should be KES (Kenyan shillings), displayed as KSh. Make the currency configurable.
+
+---
+
+## 6. HOME DASHBOARD
+
+The dashboard should immediately answer:
+
+- How much do I currently owe?
+- How much is owed to me?
+- What has happened recently?
+- What needs my attention?
+
+### Header
+
+Display a personalized greeting:
+"Good morning, Gideon."
+
+Use the user's actual display name and local time to determine the greeting.
+
+Provide:
+- Profile access.
+- Notification indicator.
+- Optional current date.
+
+### Primary financial summary
+
+Display two main cards:
+
+**Money I Owe**
+- Total outstanding amount payable by the current user.
+- Number of people involved.
+- Number of active debt records.
+
+**Owed to Me**
+- Total outstanding amount receivable by the current user.
+- Number of people who owe them.
+- Number of active debt records.
+
+Both cards must be clickable and open the corresponding filtered list.
+
+Use the terms "Money I Owe" and "Owed to Me" in the interface because they are clearer than ambiguous labels such as "Debt" and "Owed."
+
+Do not confuse the sum of these cards with net worth or cash available.
+
+### Quick actions
+
+Provide:
+- Record money borrowed.
+- Record money lent.
+- Record a repayment.
+- Record money received.
+- Add a reminder.
+
+The transaction workflow must determine which debt is being updated.
+
+### Recent activity
+
+Show recent transactions with:
+- Person.
+- Transaction type.
+- Amount.
+- Date.
+- Status.
+- Optional message indicator.
+- Optional attachment indicator.
+
+Selecting an entry opens transaction details.
+
+### Reminders preview
+
+Display upcoming reminders and overdue reminders.
+
+Provide an action to view all reminders.
+
+### Empty state
+
+When no records exist, display a friendly introduction and a clear action to add the first debt.
+
+Do not display fabricated balances or sample transactions in the production account.
+
+---
+
+## 7. PEOPLE AND CONTACTS
+
+Provide a People screen that lists the individuals associated with the user's debt records.
+
+Each person entry should show:
+- Name.
+- Optional email or phone number.
+- Amount the current user owes them.
+- Amount they owe the current user.
+- Active debt count.
+- Shared or personal relationship status.
+
+Support:
+- Search by name.
+- Sorting.
+- Filters for people with active debts, cleared debts, or shared relationships.
+- Opening a person's details.
+- Adding a person manually.
+- Linking an existing person to an app account through an invitation workflow.
+
+A person must not be required to register before the user can record a debt involving them.
+
+Allow one person to have multiple separate debt records.
+
+Do not merge debts merely because two records use the same person's name or email. Provide a deliberate linking or duplicate-management workflow where necessary.
+
+---
+
+## 8. MONEY I OWE
+
+Display a searchable list of debts where the current user is the debtor.
+
+Each debt card should include:
+- Creditor name.
+- Outstanding balance.
+- Original principal amount.
+- Total repayments.
+- Date created.
+- Optional due date.
+- Debt status.
+- Shared or personal status.
+
+Filters:
+- Active.
+- Cleared.
+- Overdue.
+- Awaiting confirmation.
+- Disputed.
+
+Actions:
+- Open debt details.
+- Record additional borrowing.
+- Record a repayment.
+- Add a reminder.
+- View transaction history.
+
+A cleared debt must remain accessible.
+
+---
+
+## 9. OWED TO ME
+
+Display a searchable list of debts where the current user is the creditor.
+
+Each record should include:
+- Debtor name.
+- Outstanding balance.
+- Original amount lent.
+- Total repayments received.
+- Date created.
+- Optional due date.
+- Debt status.
+- Shared or personal status.
+
+Actions:
+- Open debt details.
+- Record additional lending.
+- Record money received.
+- Add a reminder.
+- View transaction history.
+
+Clearly distinguish money that has been recorded as received from money awaiting confirmation by a shared participant.
+
+---
+
+## 10. CREATING A DEBT
+
+Provide a clear form for recording a new debt.
+
+Required fields:
+- Person.
+- Direction: I borrowed money or I lent money.
+- Initial amount.
+- Date of transaction.
+
+Optional fields:
+- Description.
+- Due date.
+- Initial transaction message.
+- Supporting attachments.
+- Reminder settings.
+- Link to an existing registered user.
+
+For new people, allow the user to enter a name and optional contact details.
+
+For existing people, allow selecting an existing person.
+
+Provide a clear preview before saving.
+
+Validate that:
+- Amount is greater than zero.
+- Currency precision is valid.
+- Required fields are present.
+- The selected person is valid.
+- The date is valid.
+
+Creating a debt must create a debt record and its initial transaction through a consistent workflow.
+
+If an upload or save fails, show the failure and provide a safe retry. Do not create duplicate transactions when a user retries.
+
+---
+
+## 11. DEBT DETAILS
+
+Each individual debt must have a dedicated details screen.
+
+Display:
+- Person's name.
+- Direction of debt.
+- Original principal.
+- Total additional borrowing or lending.
+- Total repayments.
+- Outstanding balance.
+- Creation date.
+- Due date, if present.
+- Active or Cleared status.
+- Shared or personal status.
+- Verification or dispute indicators where applicable.
+
+Show a chronological transaction timeline.
+
+Each transaction entry should display:
+- Type.
+- Amount.
+- Date.
+- Short message preview if available.
+- Attachment indicator if evidence exists.
+- Confirmation or dispute status where applicable.
+
+Actions:
+- Add borrowing or lending to the same debt.
+- Record repayment or received payment.
+- Add or manage reminders.
+- Open individual transactions.
+- Export relevant records.
+
+A new borrowing or lending transaction added to an existing active debt should be distinct in the ledger.
+
+Do not silently alter the original principal.
+
+---
+
+## 12. TRANSACTION TYPES AND FINANCIAL LOGIC
+
+Use explicit transaction types:
+
+- BORROWED: increases the amount the current user owes.
+- LENT: increases the amount owed to the current user.
+- REPAYMENT_MADE: reduces the amount the current user owes.
+- REPAYMENT_RECEIVED: reduces the amount owed to the current user.
+- ADJUSTMENT: records a controlled correction.
+- REVERSAL: reverses an earlier transaction through a traceable compensating entry.
+
+For an individual debt, calculate:
+
+Outstanding balance = Original principal + Additional principal transactions - Repayments + Signed adjustments.
+
+A reversal must negate the financial effect of the referenced transaction.
+
+Use a consistent ledger model in which each transaction has one defined effect on the debt balance. Store amounts as integer minor currency units when appropriate, and never use floating-point arithmetic for financial calculations.
+
+### Validation rules
+
+- Transaction amounts must be positive unless the type explicitly supports a signed adjustment.
+- Do not allow a repayment to exceed the outstanding balance by default.
+- Offer an explicit overpayment workflow if the user needs to record more than the remaining amount.
+- Do not silently clamp an overpayment to zero.
+- Do not allow a negative outstanding balance without a defined, supported business rule.
+- Require a reason for adjustments and reversals.
+- Preserve references to original entries.
+- Prevent duplicate submissions through transaction IDs or idempotency keys.
+- Use trusted server-side validation for shared financial operations.
+
+### Debt status
+
+Use derived statuses where possible:
+
+- ACTIVE: outstanding balance is greater than zero.
+- CLEARED: outstanding balance is zero after applicable posted transactions.
+
+Additional workflow indicators, such as disputed or awaiting confirmation, should be represented separately from the financial balance state.
+
+If a valid reversal or adjustment changes the balance of a cleared debt, recalculate its status.
+
+Do not erase or delete a cleared debt.
+
+### Borrowing again from the same person
+
+A person can have multiple debt records.
+
+If the user borrows from Mary, repays the amount in full, and later borrows again:
+- Keep the original debt marked Cleared.
+- Create a new debt record for the new borrowing.
+- Link both records to Mary.
+- Preserve separate transaction histories.
+- Calculate dashboard totals using the appropriate active debt records.
+
+Never reopen or overwrite an old debt merely because the same person is involved in a new loan.
+
+---
+
+## 13. TRANSACTION DETAILS, MESSAGES AND PROOF
+
+Every transaction must have a dedicated detail view.
+
+Display:
+- Transaction ID or reference.
+- Transaction type.
+- Amount.
+- Transaction date and time.
+- Creation timestamp.
+- Creator.
+- Related debt.
+- Message or description.
+- Verification status where applicable.
+- Dispute status where applicable.
+- Attachments.
+- Correction or reversal references when relevant.
+
+### Optional message
+
+Allow the user to add a transaction-specific note, for example:
+
+"Sent KSh 500 via M-Pesa as a partial repayment."
+
+Messages should be optional and editable only under defined rules. For shared transactions, preserve the original message or retain an audit trail of permitted edits.
+
+### Attachments
+
+Allow users to attach:
+- Images.
+- Screenshots.
+- PDFs where supported.
+
+Support multiple attachments per transaction.
+
+For each attachment, store appropriate metadata:
+- File ID.
+- Original filename.
+- Storage path.
+- MIME type.
+- File size.
+- Uploader ID.
+- Upload timestamp.
+
+Use secure Firebase Storage paths that associate files with the relevant debt and transaction.
+
+Enforce allowed file types and size limits. Validate uploads and avoid trusting client-supplied MIME types alone.
+
+Use authenticated, authorized access to attachments. Do not expose unrestricted public file links.
+
+The transaction details screen should provide:
+- Image preview.
+- Document viewing or download where supported.
+- Filename and file type.
+- Upload status.
+- Retry for failed uploads.
+
+When a transaction is disputed or reversed, preserve the original message and attachments.
+
+Evidence is supporting material; it does not automatically mean that the other party has confirmed the transaction.
+
+---
+
+## 14. SHARED DEBTS AND INVITATIONS
+
+Allow users to link a debt to another registered SettleUp user.
+
+### Invitation process
+
+1. The user opens a debt record.
+2. They select an action to invite the other party.
+3. They enter the recipient's email address.
+4. The application offers the appropriate invitation workflow.
+5. If the recipient has an account, send an in-app invitation.
+6. If the recipient does not have an account, allow the creator to generate a secure invitation link to share.
+7. The recipient signs in or registers.
+8. The recipient reviews the invitation and explicitly accepts or declines it.
+9. Only after acceptance should the shared relationship become active.
+
+Do not reveal whether arbitrary email addresses belong to registered users through an unrestricted public lookup endpoint. Use privacy-preserving invitation handling.
+
+Invitation links must use secure, unpredictable tokens, have expiry and revocation support, and be validated by the backend.
+
+A user must not be able to link another account to a debt without the other party's acceptance.
+
+### Shared debt model
+
+A shared debt must identify:
+- The debt record.
+- The debtor.
+- The creditor.
+- The participating user IDs.
+- The person who created the original record.
+- The invitation and linking status.
+- The shared transaction history.
+
+Both participants should see the same underlying shared transaction records, with permissions appropriate to their roles.
+
+Do not create two unrelated shared balances that can diverge without detection.
+
+### Shared transactions
+
+When a shared transaction is created:
+- Record who entered it.
+- Notify the other participant.
+- Show its verification status.
+- Allow the recipient to confirm or dispute it.
+- Preserve the original record and subsequent actions.
+
+Do not treat a notification being delivered or read as confirmation of the transaction.
+
+### Confirmation and dispute
+
+Use statuses such as:
+- AWAITING_CONFIRMATION.
+- CONFIRMED.
+- DISPUTED.
+
+Define which transaction types require confirmation and how the debt balance is affected before confirmation. Use a consistent policy throughout the application.
+
+For the initial implementation, use the following policy:
+- Personal transactions affect the personal debt ledger immediately.
+- Shared transaction entries are recorded immediately and displayed as awaiting confirmation.
+- Both parties can see the proposed entry and its status.
+- The authoritative shared balance uses posted transactions under a consistent, explicit rule.
+- A transaction that is disputed must be visibly flagged and must not be silently removed.
+- If a disputed transaction has already affected a balance, preserve it and apply any subsequent resolution through an auditable posting, adjustment, or reversal.
+- Confirmation records who confirmed the entry and when.
+
+Never allow one party to overwrite the other party's confirmation or dispute.
+
+---
+
+## 15. REMINDERS
+
+Implement a complete reminder management feature.
+
+### Reminder types
+
+- Repayment due reminder.
+- Upcoming repayment reminder.
+- Overdue debt follow-up.
+- Personal follow-up reminder.
+- Optional shared reminder.
+
+### Reminder fields
+
+- Reminder ID.
+- User ID.
+- Associated debt ID.
+- Title.
+- Optional note.
+- Scheduled date and time.
+- Time zone.
+- Recurrence.
+- Delivery preferences.
+- Completion status.
+- Created and updated timestamps.
+- Last delivery and next scheduled delivery where relevant.
+
+### Recurrence
+
+Support:
+- One-time reminders.
+- Weekly reminders.
+- Monthly reminders.
+
+Allow users to edit, snooze, complete, or cancel reminders.
+
+Allow configurable lead time before a due date where appropriate.
+
+### Behavior
+
+- Stop future repayment reminders when the associated debt is cleared.
+- Keep completed reminders in history where useful.
+- Do not repeatedly notify a user for the same scheduled reminder because of retried backend execution.
+- Use a trusted scheduling mechanism, such as scheduled Cloud Functions and a controlled reminder queue.
+- Use the user's configured time zone.
+- Handle daylight-saving changes for users outside Kenya.
+- Clearly distinguish private reminders from shared reminders.
+- Do not expose private reminders to another debt participant.
+- Request browser notification permission only when necessary.
+- Retain in-app reminder visibility if browser push is unavailable.
+
+Notification delivery should be retryable and idempotent.
+
+---
+
+## 16. NOTIFICATIONS
+
+Implement an in-app notifications centre.
+
+Notification categories:
+- Invitations received.
+- Invitation accepted or declined.
+- New shared debt record.
+- New shared transaction.
+- Transaction confirmation.
+- Transaction dispute.
+- Transaction resolution.
+- Reminder due.
+- Overdue follow-up.
+- Relevant debt status changes.
+
+Each notification should include:
+- Type.
+- Title.
+- Short message.
+- Related entity reference.
+- Creation timestamp.
+- Read/unread status.
+- Optional action.
+
+Selecting a notification should navigate to the relevant debt, transaction, invitation, or reminder.
+
+Provide:
+- Mark as read.
+- Mark all as read.
+- Appropriate filtering.
+- Notification preferences.
+
+Do not expose unnecessary financial details in lock-screen or browser push previews.
+
+Use Firebase Cloud Messaging for supported browser push notifications, with appropriate permission handling.
+
+Keep notification records in Firestore so users can review their activity even if push notifications are disabled.
+
+Generate notifications through trusted backend workflows where necessary. Avoid sending duplicate notifications on retried operations.
+
+---
+
+## 17. FINANCIAL SUMMARY AND ACTIVITY
+
+Provide a Summary screen that presents useful information without unnecessary accounting complexity.
+
+### Main figures
+
+- Total amount currently owed by the user.
+- Total amount currently owed to the user.
+- Total borrowed during the selected period.
+- Total lent during the selected period.
+- Total repayments made.
+- Total repayments received.
+- Outstanding balance by person.
+- Number of active and cleared debts.
+
+Clearly distinguish current outstanding balances from transaction flows during a selected period.
+
+### Date filters
+
+Support:
+- Today.
+- This week.
+- This month.
+- This year.
+- Custom date range.
+- All time.
+
+### Transaction filters
+
+Support:
+- Person.
+- Transaction type.
+- Debt direction.
+- Verification status.
+- Debt status.
+- Date range.
+
+### Charts
+
+Use a small number of useful visualizations:
+- Borrowing and lending over time.
+- Repayments made versus received.
+- Outstanding balances by person.
+
+Include clear labels, currency formatting, accessible colors, and empty states.
+
+Do not show charts with fabricated data when the account has no transactions.
+
+### Activity screen
+
+Show the user's complete authorized transaction history.
+
+Use a chronological timeline or table with:
+- Date.
+- Person.
+- Description.
+- Transaction type.
+- Amount.
+- Related debt.
+- Verification status.
+
+Selecting a transaction opens its detail screen, including messages and proof attachments.
+
+---
+
+## 18. EXCEL AND CSV EXPORTS
+
+Implement actual file generation and downloads.
+
+### Export options
+
+- Entire transaction ledger.
+- Transactions for a selected date range.
+- Records associated with a selected person.
+- Money I Owe.
+- Owed to Me.
+- Active debts.
+- Cleared debts.
+- Summary report.
+
+### XLSX workbook
+
+Create a clean Excel workbook with suitable sheets, such as:
+
+**Sheet 1: Summary**
+- Export date.
+- Preferred currency.
+- Total outstanding payable.
+- Total outstanding receivable.
+- Number of active debts.
+- Number of cleared debts.
+- Relevant reporting period.
+
+**Sheet 2: Debt Records**
+- Debt reference.
+- Person.
+- Direction.
+- Original principal.
+- Total additional borrowing or lending.
+- Total repayments.
+- Current outstanding balance.
+- Creation date.
+- Due date.
+- Status.
+
+**Sheet 3: Transactions**
+- Transaction ID.
+- Debt reference.
+- Person.
+- Transaction type.
+- Amount.
+- Date and time.
+- Description.
+- Creator.
+- Verification status.
+- Dispute status.
+- Attachment filenames or references where appropriate.
+
+Use consistent column headings, appropriate date formats, currency formatting, and reasonable column widths.
+
+### CSV
+
+Support CSV export for transactions and relevant filtered datasets.
+
+Escape commas, quotes, and line breaks correctly. Protect spreadsheet users from formula injection when exporting untrusted text fields.
+
+### Privacy
+
+Only export records the authenticated user is authorized to access.
+
+Do not embed private attachment files inside the workbook. Export filenames or authorized references as appropriate.
+
+Do not display a success message until the file has actually been generated and is ready for download.
+
+---
+
+## 19. PROFILE AND SETTINGS
+
+Provide a settings area for:
+- Display name.
+- Email and verification status.
+- Preferred currency.
+- Time zone.
+- Notification preferences.
+- Browser push notification preferences.
+- Default reminder preferences.
+- Password changes or account security management.
+- Linked accounts and shared debts.
+- Export access.
+- Privacy policy.
+- Account deletion.
+
+Use a consistent currency formatter throughout the application.
+
+KES should be the initial default, but the architecture should permit other currencies.
+
+Do not silently convert currencies. If debts use different currencies, maintain their original currency and do not sum unlike currencies into one misleading total without an explicitly implemented conversion feature.
+
+Account deletion must be deliberate and documented. Explain the implications for personal records and shared financial histories before proceeding.
+
+---
+
+## 20. FIRESTORE DATA MODEL
+
+Design a clear, scalable Firestore schema. The following is the conceptual starting point; adapt collection paths where necessary, but preserve the relationships and security requirements.
+
+### users/{uid}
+
+Fields:
+- displayName
+- email
+- preferredCurrency
+- timeZone
+- notificationPreferences
+- createdAt
+- updatedAt
+
+### users/{uid}/people/{personId}
+
+Fields:
+- displayName
+- email (optional)
+- phone (optional)
+- linkedUserId (optional)
+- createdAt
+- updatedAt
+
+Personal contact information must be protected by authorization rules.
+
+### debts/{debtId}
+
+Fields:
+- ownerId for personal records.
+- debtorUserId where linked.
+- creditorUserId where linked.
+- debtorPersonId or creditorPersonId for contact references as appropriate.
+- currency.
+- originalPrincipalMinorUnits.
+- description.
+- dueDate (optional).
+- createdAt.
+- createdBy.
+- relationshipType: PERSONAL or SHARED.
+- status or derived status information.
+- sharedParticipantIds where appropriate.
+- schemaVersion.
+
+For shared records, define exactly which participant roles can access the document.
+
+### debts/{debtId}/transactions/{transactionId}
+
+Fields:
+- type.
+- amountMinorUnits.
+- effectiveDate.
+- createdAt.
+- createdBy.
+- description.
+- message (optional).
+- status.
+- confirmation metadata where applicable.
+- reversalOfTransactionId (optional).
+- correctionReason (optional).
+- idempotencyKey.
+- schemaVersion.
+
+Use explicit signed-effect rules or a consistent transaction-type mapping to calculate balances.
+
+### debts/{debtId}/transactions/{transactionId}/attachments/{attachmentId}
+
+Fields:
+- storagePath.
+- originalFilename.
+- contentType.
+- fileSize.
+- uploadedBy.
+- uploadedAt.
+
+Avoid storing unrestricted public URLs as the primary access mechanism.
+
+### shared relationships and invitations
+
+Create appropriate collections for:
+- Shared relationship membership.
+- Invitations.
+- Invitation expiry and revocation.
+- Confirmation records.
+- Dispute records and resolution history.
+
+### users/{uid}/reminders/{reminderId}
+
+Fields:
+- debtId.
+- title.
+- note.
+- scheduledAt.
+- timeZone.
+- recurrence.
+- status.
+- deliveryPreferences.
+- createdAt.
+- updatedAt.
+- lastDeliveredAt where relevant.
+
+### users/{uid}/notifications/{notificationId}
+
+Fields:
+- type.
+- title.
+- body.
+- relatedEntityType.
+- relatedEntityId.
+- createdAt.
+- readAt (optional).
+- deliveryStatus where applicable.
+
+### Audit records
+
+Preserve relevant events for:
+- Corrections.
+- Reversals.
+- Confirmations.
+- Disputes.
+- Resolutions.
+- Invitation acceptance.
+- Security-sensitive changes.
+
+Do not trust a client-supplied creator ID, timestamp, balance, or verification status. Use trusted backend values and authorization checks.
+
+Avoid duplicating authoritative financial data across documents in ways that can silently diverge. If summary values are cached for performance, define how they are maintained and reconciled against the ledger.
+
+---
+
+## 21. FIREBASE SECURITY
+
+Security is a core requirement, not a final optional task.
+
+### Authentication
+
+- Require authentication for private financial data.
+- Validate user sessions.
+- Handle revoked or expired sessions appropriately.
+- Do not rely on hiding UI elements as authorization.
+
+### Firestore Security Rules
+
+Write and test explicit rules.
+
+Users should only access their own personal records.
+
+Shared records should only be accessible to accepted participants with appropriate permissions.
+
+Enforce rules for:
+- Reading.
+- Creating.
+- Updating.
+- Deleting where deletion is permitted.
+- Membership changes.
+- Transaction confirmation.
+- Dispute creation.
+- Attachment metadata.
+- Notifications.
+- Invitations.
+
+Prevent unauthorized changes to immutable transaction fields.
+
+Never allow an arbitrary client to:
+- Change another user's debt.
+- Set its own confirmation status on behalf of another participant.
+- Change a debt's balance directly.
+- Add itself to a shared relationship without acceptance.
+- Read arbitrary users' contact information or financial records.
+
+### Storage Security Rules
+
+- Require authentication.
+- Validate the requesting user's access to the associated debt and transaction.
+- Restrict file sizes.
+- Restrict accepted file types.
+- Prevent unrelated users from reading, replacing, or deleting evidence.
+- Avoid publicly readable transaction proof.
+
+### Cloud Functions
+
+Validate all relevant input on the server.
+
+Use the Admin SDK only in trusted server-side environments.
+
+Use server timestamps and authoritative authorization checks.
+
+For privileged operations, verify that the caller is authenticated and is an authorized participant.
+
+### Data privacy
+
+Collect only the information needed by the product.
+
+Do not expose full transaction details through push notifications unnecessarily.
+
+Do not create a public user directory.
+
+Provide a clear privacy policy and account deletion workflow.
+
+---
+
+## 22. ERROR HANDLING AND RESILIENCE
+
+Provide useful loading, success, empty, and error states throughout the app.
+
+Handle:
+- Network interruptions.
+- Authentication errors.
+- Permission failures.
+- Firestore read/write failures.
+- Storage upload failures.
+- Duplicate submissions.
+- Invalid dates or amounts.
+- Expired invitations.
+- Notification permission denial.
+- Failed reminder delivery.
+- Export generation errors.
+
+Do not silently discard user input.
+
+Prevent duplicate financial transactions when users click Save repeatedly or retry after an uncertain response.
+
+Disable or guard duplicate submissions while an operation is pending.
+
+Provide retry options where safe.
+
+For sensitive operations, verify the final persisted state before reporting success.
+
+Do not present mock data or simulated success as real Firebase functionality.
+
+---
+
+## 23. TESTING REQUIREMENTS
+
+Create tests for financial calculations, authorization, transaction workflows, reminders, and exports.
+
+### Financial tests
+
+1. Borrow KSh 1,000: outstanding is KSh 1,000.
+2. Repay KSh 200: outstanding is KSh 800.
+3. Borrow an additional KSh 500 on the same debt: outstanding is KSh 1,300.
+4. Repay KSh 300: outstanding is KSh 1,000.
+5. Repay the final KSh 1,000: debt becomes Cleared.
+6. Borrow again from the same person: create a new debt record.
+7. Confirm that the original debt remains Cleared and unchanged.
+8. Reject an unsupported overpayment.
+9. Verify the explicitly supported overpayment workflow, if implemented.
+10. Reverse a transaction and verify the balance is recalculated correctly.
+11. Verify that a correction requires a reason.
+12. Verify that the same transaction cannot be posted twice.
+
+### Shared debt tests
+
+- Invitations require acceptance.
+- Expired invitations cannot be accepted.
+- Unauthorized users cannot access a shared debt.
+- Confirmation identifies the confirming participant.
+- A participant cannot confirm on behalf of the other party.
+- Disputed transactions remain visible.
+- Reversals and resolutions preserve the audit trail.
+
+### Evidence tests
+
+- An authorized user can view their own personal evidence.
+- An accepted participant can access permitted shared evidence.
+- An unrelated user cannot access the files.
+- Invalid file types and oversized files are rejected.
+- Failed uploads can be retried safely.
+
+### Reminder tests
+
+- One-time reminders are scheduled correctly.
+- Weekly and monthly recurrence follows the configured time zone.
+- Cleared debts stop future repayment reminders.
+- Retried scheduling operations do not create duplicates.
+- Snoozing, completion, and cancellation work correctly.
+
+### Export tests
+
+- XLSX and CSV files are valid.
+- Filters return the correct records.
+- Cleared debts remain in exports.
+- Transaction messages and attachment references are handled appropriately.
+- Exported financial totals match the authoritative ledger.
+- Untrusted text is safely handled in spreadsheet output.
+
+### Security tests
+
+Use Firebase Emulator Suite tests where practical to verify Firestore and Storage rules.
+
+Test access using multiple user identities, including an unrelated unauthorized user.
+
+---
+
+## 24. DEVELOPMENT WORKFLOW
+
+Develop the project incrementally.
+
+### Stage 1: Foundation
+
+- Initialize the project.
+- Configure React and TypeScript.
+- Set up routing and the design system.
+- Create the Firebase project configuration.
+- Implement authentication and profile initialization.
+- Establish the Firestore schema.
+- Implement initial security rules.
+- Verify that the app starts and builds.
+
+### Stage 2: Core debt tracking
+
+- People and contacts.
+- Create debt.
+- Money I Owe.
+- Owed to Me.
+- Debt details.
+- Transaction ledger.
+- Partial and full repayments.
+- Additional borrowing or lending.
+- Automatic cleared status.
+- Separate new debts for repeated borrowing.
+- Transaction messages and attachments.
+
+### Stage 3: Dashboard and reporting
+
+- Dashboard summaries.
+- Recent activity.
+- Search and filters.
+- Financial summary.
+- Charts.
+- Excel and CSV export.
+
+### Stage 4: Reminders and notifications
+
+- Reminder creation and management.
+- Scheduled backend delivery.
+- In-app notifications.
+- Browser push notifications where supported.
+- Due dates and overdue follow-ups.
+
+### Stage 5: Shared records
+
+- Invitations.
+- Account linking.
+- Shared transaction workflows.
+- Confirmation and dispute handling.
+- Secure shared evidence.
+- Notification integration.
+
+### Stage 6: Production readiness
+
+- Automated tests.
+- Security rules validation.
+- Error handling.
+- Accessibility review.
+- Responsive design review.
+- Firebase Hosting deployment.
+- Environment and setup documentation.
+
+The stages define implementation order, not permission to omit features from the product requirements.
+
+---
+
+## 25. IMPLEMENTATION RULES FOR THE AI DEVELOPER
+
+Follow these instructions throughout development:
+
+1. Read the complete specification before starting.
+2. Create a concise implementation plan and project file structure.
+3. Build actual working functionality, not merely screenshots or mockups.
+4. Preserve the established design direction across all screens.
+5. Use Firebase for authentication, data persistence, storage, and appropriate backend workflows.
+6. Never claim a Firebase feature works until its configuration and integration are implemented and tested.
+7. Do not invent Firebase project credentials or pretend that an external project has been configured.
+8. If configuration requires user action, identify exactly what is required and provide clear setup instructions.
+9. Never hardcode private keys or service account credentials into frontend code.
+10. Do not store balances as independently editable values when they should be derived from transactions.
+11. Never silently delete or overwrite historical financial entries.
+12. Preserve cleared debts and allow separate future debt records for the same person.
+13. Make messages and evidence accessible from individual transaction details.
+14. Integrate reminders and notifications with the correct debt and transaction records.
+15. Implement and test security rules, not just frontend access controls.
+16. Avoid unnecessary abstractions, duplicate dependencies, and overcomplicated architecture.
+17. Use clear naming, small reusable components, and maintainable TypeScript.
+18. Include required Firebase configuration files, security rules, indexes, and backend code in the project.
+19. Keep secrets in the appropriate secure configuration mechanism.
+20. Provide a README with setup, environment configuration, Firebase services, local development, testing, and deployment instructions.
+21. Run the available tests and production build, and fix errors introduced by the implementation.
+22. Clearly identify incomplete features, missing external configuration, and deployment limitations.
+23. Never report a feature as complete merely because its UI exists.
+24. Do not regenerate the entire application unnecessarily when fixing a small issue.
+25. At the end of each development stage, summarize files created or changed, functionality completed, tests performed, and remaining work.
+
+## 26. DEFINITION OF DONE
+
+The application is ready for an initial production release only when:
+
+- Users can register, log in, and recover accounts.
+- Financial records persist in Firebase.
+- Personal debt tracking works without another person registering.
+- Shared records require explicit acceptance.
+- Borrowing, lending, repayments, corrections, and reversals produce accurate balances.
+- Cleared debts remain available and new debts can be created for the same person.
+- Transaction messages and proof attachments can be uploaded and viewed by authorized users.
+- Reminders can be scheduled, managed, and delivered through supported channels.
+- Shared transaction notifications and verification workflows work.
+- Dashboard totals and reports match the underlying ledger.
+- XLSX and CSV exports contain the expected data.
+- Firestore and Storage rules prevent unauthorized access.
+- Core financial and authorization tests pass.
+- The application builds and can be deployed.
+- Setup and deployment instructions are complete.
+
+## FINAL INSTRUCTION
+
+Begin by examining the project environment and preparing a practical implementation plan.
+
+Then implement the foundation and the first working features incrementally. Do not attempt to produce an untested, fully featured application in a single enormous code-generation step.
+
+Keep the product requirements as the source of truth. When implementation decisions are necessary, choose the simplest secure design that preserves financial accuracy, privacy, usability, and the established visual style.
+
+The final result should feel like a cohesive, polished financial application that a real person can trust to organize their debt records.

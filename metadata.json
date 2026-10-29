@@ -1,0 +1,6 @@
+{
+  "name": "SettleUp",
+  "description": "Personal debt management and repayment tracking with clear ledgers, balances, and transaction history.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
